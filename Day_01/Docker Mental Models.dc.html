@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    @keyframes dashmove { to { background-position: 80px 0; } }
+  </style>
+</helmet>
+
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%">
+
+  <!-- ============ SLIDE 1 — COVER ============ -->
+  <section data-label="Cover" data-speaker-notes="Day 1 foundations. We're going to build mental models, not memorize commands. Seven diagrams: VM vs container, image vs container, architecture, the run flow, lifecycle, Linux internals, and statelessness." style="width:100%;height:100%;box-sizing:border-box;padding:84px 96px;display:flex;flex-direction:column;justify-content:space-between;font-family:'IBM Plex Sans',sans-serif;color:#14202E;background-color:#EEF2F6;background-image:linear-gradient(#14202e0d 1px,transparent 1px),linear-gradient(90deg,#14202e0d 1px,transparent 1px);background-size:48px 48px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:18px;letter-spacing:3px;text-transform:uppercase;color:#2E6FE0;">Docker · Day 1 · Foundations</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;letter-spacing:2px;color:#5B6B7B;border:1.5px solid #C5D0DB;padding:6px 12px;border-radius:3px;">VISUAL FIELD GUIDE</div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:72px;">
+      <div style="flex:1;">
+        <div style="font-size:108px;font-weight:700;line-height:0.98;letter-spacing:-2px;">Docker,<br>drawn out.</div>
+        <div style="margin-top:28px;font-size:27px;line-height:1.45;color:#5B6B7B;max-width:760px;">Seven mental models for complete beginners. Stop memorizing commands — see how containers, images, the daemon and the kernel actually fit together.</div>
+      </div>
+      <!-- blueprint container glyph: simple nested boxes -->
+      <div style="width:360px;height:360px;flex:none;position:relative;border:2px solid #2E6FE0;border-radius:6px;background:#fff;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding:22px;">
+        <div style="position:absolute;top:-14px;left:24px;background:#EEF2F6;padding:0 10px;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;letter-spacing:2px;">CONTAINER</div>
+        <div style="height:30px;border:1.5px dashed #2E6FE0;border-radius:3px;background:#2e6fe014;display:flex;align-items:center;padding:0 12px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;">writable layer</div>
+        <div style="height:34px;border:1.5px solid #C5D0DB;border-radius:3px;background:#F4F7FA;"></div>
+        <div style="height:34px;border:1.5px solid #C5D0DB;border-radius:3px;background:#F4F7FA;"></div>
+        <div style="height:34px;border:1.5px solid #C5D0DB;border-radius:3px;background:#F4F7FA;"></div>
+        <div style="height:34px;border:1.5px solid #C5D0DB;border-radius:3px;background:#F4F7FA;display:flex;align-items:center;padding:0 12px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">read-only image layers</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:14px;flex-wrap:wrap;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#5B6B7B;border:1.5px solid #C5D0DB;background:#fff;padding:9px 14px;border-radius:3px;">01 · VM vs Container</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#5B6B7B;border:1.5px solid #C5D0DB;background:#fff;padding:9px 14px;border-radius:3px;">02 · Image → Container</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#5B6B7B;border:1.5px solid #C5D0DB;background:#fff;padding:9px 14px;border-radius:3px;">03 · Architecture</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#5B6B7B;border:1.5px solid #C5D0DB;background:#fff;padding:9px 14px;border-radius:3px;">04 · The run flow</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#5B6B7B;border:1.5px solid #C5D0DB;background:#fff;padding:9px 14px;border-radius:3px;">05 · Lifecycle</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#5B6B7B;border:1.5px solid #C5D0DB;background:#fff;padding:9px 14px;border-radius:3px;">06 · Kernel internals</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#5B6B7B;border:1.5px solid #C5D0DB;background:#fff;padding:9px 14px;border-radius:3px;">07 · Statelessness</div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2 — THE PROBLEM ============ -->
+  <section data-label="The Problem" data-speaker-notes="Software never runs in a vacuum. The whole reason Docker exists is 'works on my machine'. The shipping-container analogy: standardize the box, and any crane, truck or ship handles it without caring what's inside." style="width:100%;height:100%;box-sizing:border-box;padding:64px 80px;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;color:#14202E;background-color:#F4F7FA;background-image:linear-gradient(#14202e0a 1px,transparent 1px),linear-gradient(90deg,#14202e0a 1px,transparent 1px);background-size:48px 48px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:17px;letter-spacing:3px;text-transform:uppercase;color:#2E6FE0;">Why Docker exists</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:#5B6B7B;">00 / 07</div>
+    </div>
+    <div style="font-size:50px;font-weight:700;margin-top:10px;letter-spacing:-1px;">“But it works on my machine.”</div>
+    <div style="font-size:23px;color:#5B6B7B;margin-top:8px;max-width:1180px;line-height:1.4;">An app is never just code. It drags along a runtime, system libraries, env vars and other services. Move it, and any one mismatch breaks everything.</div>
+
+    <div style="display:flex;gap:40px;margin-top:38px;flex:1;align-items:stretch;">
+      <!-- before -->
+      <div style="flex:1;border:1.5px solid #C5D0DB;background:#fff;border-radius:6px;padding:28px 30px;display:flex;flex-direction:column;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;letter-spacing:2px;color:#8A98A6;text-transform:uppercase;">Before — the chaos</div>
+        <div style="font-size:26px;font-weight:600;margin-top:6px;">Every app a different shape</div>
+        <div style="margin-top:22px;display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:14px;"><div style="width:44px;height:30px;border:1.5px solid #C5D0DB;border-radius:14px 2px 18px 4px;background:#F4F7FA;"></div><div style="font-size:19px;color:#5B6B7B;">Python 3.12 · a specific <span style="font-family:'IBM Plex Mono',monospace;">glibc</span></div></div>
+          <div style="display:flex;align-items:center;gap:14px;"><div style="width:44px;height:30px;border:1.5px solid #C5D0DB;border-radius:3px 16px 2px 12px;background:#F4F7FA;"></div><div style="font-size:19px;color:#5B6B7B;">env vars · config files · paths</div></div>
+          <div style="display:flex;align-items:center;gap:14px;"><div style="width:44px;height:30px;border:1.5px solid #C5D0DB;border-radius:18px 4px 2px 14px;background:#F4F7FA;"></div><div style="font-size:19px;color:#5B6B7B;">a database · a cache · a queue</div></div>
+        </div>
+        <div style="margin-top:auto;font-size:19px;color:#14202E;border-top:1.5px dashed #C5D0DB;padding-top:18px;">Setup docs, golden images, "config drift" — and it still breaks on the next machine.</div>
+      </div>
+
+      <div style="flex:none;align-self:center;display:flex;flex-direction:column;align-items:center;gap:8px;color:#2E6FE0;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;letter-spacing:2px;">PACKAGE IT</div>
+        <div style="font-size:56px;line-height:1;">→</div>
+      </div>
+
+      <!-- after -->
+      <div style="flex:1;border:1.5px solid #2E6FE0;background:#2e6fe008;border-radius:6px;padding:28px 30px;display:flex;flex-direction:column;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;letter-spacing:2px;color:#2E6FE0;text-transform:uppercase;">After — the standard box</div>
+        <div style="font-size:26px;font-weight:600;margin-top:6px;">App + its whole environment, sealed</div>
+        <div style="margin-top:22px;display:flex;gap:12px;">
+          <div style="flex:1;height:120px;border:1.5px solid #2E6FE0;border-radius:4px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><div style="width:34px;height:26px;border:1.5px solid #2E6FE0;border-radius:3px;"></div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;">image</div></div>
+          <div style="flex:1;height:120px;border:1.5px solid #2E6FE0;border-radius:4px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><div style="width:34px;height:26px;border:1.5px solid #2E6FE0;border-radius:3px;"></div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;">image</div></div>
+          <div style="flex:1;height:120px;border:1.5px solid #2E6FE0;border-radius:4px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><div style="width:34px;height:26px;border:1.5px solid #2E6FE0;border-radius:3px;"></div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;">image</div></div>
+        </div>
+        <div style="margin-top:auto;font-size:19px;color:#14202E;border-top:1.5px solid #2E6FE0;padding-top:18px;">Identical units. Your laptop, a teammate's, a server — same crane handles them all.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:30px;display:flex;align-items:center;gap:18px;background:#14202E;border-radius:6px;padding:20px 28px;">
+      <div style="font-size:34px;">🚢</div>
+      <div style="font-size:21px;color:#EEF2F6;line-height:1.4;"><strong style="color:#fff;">The shipping-container analogy.</strong> Before standardized steel boxes, loading a ship was chaos — every item a different shape. Standardize the container and any crane, truck or ship moves it without knowing the contents. Docker did that for software.</div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 3 — VM vs CONTAINER ============ -->
+  <section data-label="VM vs Container" data-speaker-notes="The single most important Day 1 idea. A container is NOT a lightweight VM. A VM virtualizes hardware and stacks a full guest OS per app. A container virtualizes the OS — all containers share the host kernel, no guest OS. That removed layer is why containers are MB not GB and start in milliseconds." style="width:100%;height:100%;box-sizing:border-box;padding:56px 72px;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;color:#14202E;background-color:#F4F7FA;background-image:linear-gradient(#14202e0a 1px,transparent 1px),linear-gradient(90deg,#14202e0a 1px,transparent 1px);background-size:48px 48px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:17px;letter-spacing:3px;text-transform:uppercase;color:#2E6FE0;">Model 01 · The layer stacks</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:#5B6B7B;">01 / 07</div>
+    </div>
+    <div style="font-size:46px;font-weight:700;margin-top:6px;letter-spacing:-1px;">A container is not a lightweight VM</div>
+    <div style="font-size:21px;color:#5B6B7B;margin-top:4px;">Same apps, different foundations. Watch the <span style="color:#2E6FE0;font-weight:600;">guest-OS layer</span> disappear.</div>
+
+    <div style="display:flex;gap:48px;margin-top:26px;flex:1;align-items:flex-end;">
+      <!-- VM stack -->
+      <div style="flex:1;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">
+          <div style="font-size:24px;font-weight:700;">Virtual Machine</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#5B6B7B;">virtualizes hardware</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px;justify-content:flex-end;">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;">
+            <div style="border:1.5px solid #14202E;background:#fff;padding:11px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;border-radius:3px;">App A</div>
+            <div style="border:1.5px solid #14202E;background:#fff;padding:11px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;border-radius:3px;">App B</div>
+            <div style="border:1.5px solid #14202E;background:#fff;padding:11px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;border-radius:3px;">App C</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;">
+            <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;padding:9px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#5B6B7B;border-radius:3px;">Bins/Lib</div>
+            <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;padding:9px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#5B6B7B;border-radius:3px;">Bins/Lib</div>
+            <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;padding:9px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#5B6B7B;border-radius:3px;">Bins/Lib</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;position:relative;">
+            <div style="border:1.5px solid #2E6FE0;background:#2e6fe014;padding:16px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;border-radius:3px;font-weight:600;">Guest OS<br><span style="font-size:11px;font-weight:400;">+ kernel</span></div>
+            <div style="border:1.5px solid #2E6FE0;background:#2e6fe014;padding:16px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;border-radius:3px;font-weight:600;">Guest OS<br><span style="font-size:11px;font-weight:400;">+ kernel</span></div>
+            <div style="border:1.5px solid #2E6FE0;background:#2e6fe014;padding:16px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;border-radius:3px;font-weight:600;">Guest OS<br><span style="font-size:11px;font-weight:400;">+ kernel</span></div>
+            <div style="position:absolute;right:-10px;top:50%;transform:translate(100%,-50%);font-family:'IBM Plex Mono',monospace;font-size:12px;color:#2E6FE0;white-space:nowrap;">←×3</div>
+          </div>
+          <div style="border:1.5px solid #C5D0DB;background:#fff;padding:11px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:15px;border-radius:3px;">Hypervisor</div>
+          <div style="border:1.5px solid #C5D0DB;background:#fff;padding:11px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:15px;border-radius:3px;">Host Operating System</div>
+          <div style="border:1.5px solid #14202E;background:#14202E;color:#fff;padding:12px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:15px;border-radius:3px;">Physical Hardware</div>
+        </div>
+      </div>
+
+      <!-- container stack -->
+      <div style="flex:1;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">
+          <div style="font-size:24px;font-weight:700;color:#2E6FE0;">Container</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#2E6FE0;">virtualizes the OS</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px;justify-content:flex-end;">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;">
+            <div style="border:1.5px solid #14202E;background:#fff;padding:11px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;border-radius:3px;">App A</div>
+            <div style="border:1.5px solid #14202E;background:#fff;padding:11px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;border-radius:3px;">App B</div>
+            <div style="border:1.5px solid #14202E;background:#fff;padding:11px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;border-radius:3px;">App C</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;">
+            <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;padding:9px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#5B6B7B;border-radius:3px;">Bins/Lib</div>
+            <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;padding:9px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#5B6B7B;border-radius:3px;">Bins/Lib</div>
+            <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;padding:9px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#5B6B7B;border-radius:3px;">Bins/Lib</div>
+          </div>
+          <div style="border:1.5px dashed #2E6FE0;background:repeating-linear-gradient(45deg,#2e6fe00a,#2e6fe00a 8px,transparent 8px,transparent 16px);padding:14px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;border-radius:3px;font-weight:600;">no guest OS — this whole layer is gone · MB, not GB</div>
+          <div style="border:1.5px solid #2E6FE0;background:#2e6fe014;padding:11px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#2E6FE0;font-weight:600;border-radius:3px;">Docker Engine (daemon)</div>
+          <div style="border:1.5px solid #14202E;background:#fff;padding:11px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:15px;border-radius:3px;">Host OS · <strong>shared kernel</strong></div>
+          <div style="border:1.5px solid #14202E;background:#14202E;color:#fff;padding:12px 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:15px;border-radius:3px;">Physical Hardware</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px;">
+      <div style="border:1.5px solid #C5D0DB;background:#fff;border-radius:5px;padding:14px 18px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:1px;color:#8A98A6;text-transform:uppercase;">Size</div><div style="font-size:19px;margin-top:2px;">Gigabytes <span style="color:#2E6FE0;font-weight:600;">→ Megabytes</span></div></div>
+      <div style="border:1.5px solid #C5D0DB;background:#fff;border-radius:5px;padding:14px 18px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:1px;color:#8A98A6;text-transform:uppercase;">Startup</div><div style="font-size:19px;margin-top:2px;">Minutes <span style="color:#2E6FE0;font-weight:600;">→ Milliseconds</span></div></div>
+      <div style="border:1.5px solid #C5D0DB;background:#fff;border-radius:5px;padding:14px 18px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:1px;color:#8A98A6;text-transform:uppercase;">Density / host</div><div style="font-size:19px;margin-top:2px;">Tens <span style="color:#2E6FE0;font-weight:600;">→ Thousands</span></div></div>
+      <div style="border:1.5px solid #C5D0DB;background:#fff;border-radius:5px;padding:14px 18px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:1px;color:#8A98A6;text-transform:uppercase;">Isolation</div><div style="font-size:19px;margin-top:2px;">Hardware-level → Process-level</div></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 4 — IMAGE → CONTAINER ============ -->
+  <section data-label="Image → Container" data-speaker-notes="An image is a read-only template — the blueprint. A container is a running instance of it. One image, many containers. Image is to container as a class is to an object, or a recipe to the cooked dish. Each container adds its own thin writable layer on top of the shared read-only image." style="width:100%;height:100%;box-sizing:border-box;padding:56px 80px;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;color:#14202E;background-color:#F4F7FA;background-image:linear-gradient(#14202e0a 1px,transparent 1px),linear-gradient(90deg,#14202e0a 1px,transparent 1px);background-size:48px 48px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:17px;letter-spacing:3px;text-transform:uppercase;color:#2E6FE0;">Model 02 · One blueprint, many instances</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:#5B6B7B;">02 / 07</div>
+    </div>
+    <div style="font-size:46px;font-weight:700;margin-top:6px;letter-spacing:-1px;">Image vs Container</div>
+    <div style="font-size:21px;color:#5B6B7B;margin-top:4px;">The image is the template. The container is the thing actually running.</div>
+
+    <div style="display:flex;gap:56px;margin-top:30px;flex:1;align-items:center;">
+      <!-- image -->
+      <div style="flex:none;width:300px;display:flex;flex-direction:column;align-items:center;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;letter-spacing:2px;color:#5B6B7B;text-transform:uppercase;margin-bottom:14px;">read-only template</div>
+        <div style="width:240px;border:2px solid #14202E;border-radius:6px;background:#fff;padding:16px;display:flex;flex-direction:column;gap:9px;">
+          <div style="height:38px;border:1.5px solid #C5D0DB;background:#F4F7FA;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">app code</div>
+          <div style="height:38px;border:1.5px solid #C5D0DB;background:#F4F7FA;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">dependencies</div>
+          <div style="height:38px;border:1.5px solid #C5D0DB;background:#F4F7FA;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">runtime + libs</div>
+          <div style="height:38px;border:1.5px solid #C5D0DB;background:#F4F7FA;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">base layer</div>
+        </div>
+        <div style="margin-top:14px;font-size:24px;font-weight:700;">IMAGE</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#5B6B7B;margin-top:2px;">nginx:1.27</div>
+      </div>
+
+      <!-- arrow -->
+      <div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:8px;color:#2E6FE0;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;background:#2E6FE0;color:#fff;padding:7px 14px;border-radius:3px;letter-spacing:1px;">docker run</div>
+        <div style="font-size:52px;line-height:1;">→</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">instantiate</div>
+      </div>
+
+      <!-- containers -->
+      <div style="flex:1;display:flex;flex-direction:column;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;letter-spacing:2px;color:#2E6FE0;text-transform:uppercase;margin-bottom:14px;">running instances</div>
+        <div style="display:flex;gap:22px;">
+          <div style="flex:1;border:2px solid #2E6FE0;border-radius:6px;background:#2e6fe008;padding:14px;display:flex;flex-direction:column;gap:7px;">
+            <div style="height:30px;border:1.5px dashed #2E6FE0;background:repeating-linear-gradient(45deg,#2e6fe00f,#2e6fe00f 7px,transparent 7px,transparent 14px);border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#2E6FE0;">writable</div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;margin-top:2px;">web-1</div>
+          </div>
+          <div style="flex:1;border:2px solid #2E6FE0;border-radius:6px;background:#2e6fe008;padding:14px;display:flex;flex-direction:column;gap:7px;">
+            <div style="height:30px;border:1.5px dashed #2E6FE0;background:repeating-linear-gradient(45deg,#2e6fe00f,#2e6fe00f 7px,transparent 7px,transparent 14px);border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#2E6FE0;">writable</div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;margin-top:2px;">web-2</div>
+          </div>
+          <div style="flex:1;border:2px solid #2E6FE0;border-radius:6px;background:#2e6fe008;padding:14px;display:flex;flex-direction:column;gap:7px;">
+            <div style="height:30px;border:1.5px dashed #2E6FE0;background:repeating-linear-gradient(45deg,#2e6fe00f,#2e6fe00f 7px,transparent 7px,transparent 14px);border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#2E6FE0;">writable</div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="height:26px;border:1.5px solid #C5D0DB;background:#fff;border-radius:3px;"></div>
+            <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;margin-top:2px;">web-3</div>
+          </div>
+        </div>
+        <div style="font-size:18px;color:#5B6B7B;margin-top:16px;line-height:1.4;">Shared <strong style="color:#14202E;">read-only</strong> layers below; each container gets its own thin <span style="color:#2E6FE0;font-weight:600;">writable layer</span> on top. The image is never modified.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:18px;margin-top:22px;">
+      <div style="flex:1;display:flex;align-items:center;gap:18px;border:1.5px solid #C5D0DB;background:#fff;border-radius:6px;padding:18px 24px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#2E6FE0;border:1.5px solid #2E6FE0;border-radius:3px;padding:5px 10px;white-space:nowrap;">class → object</div>
+        <div style="font-size:19px;color:#14202E;">The image is the <strong>class</strong>; each container is an <strong>object</strong> instantiated from it.</div>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;gap:18px;border:1.5px solid #C5D0DB;background:#fff;border-radius:6px;padding:18px 24px;">
+        <div style="font-size:30px;">🍳</div>
+        <div style="font-size:19px;color:#14202E;">The image is the <strong>recipe</strong>; each container is a <strong>cooked dish</strong>. Many dishes, one recipe.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 5 — ARCHITECTURE ============ -->
+  <section data-label="Architecture" data-speaker-notes="Client–server. The docker CLI you type into just sends REST API requests; it does no real work. The daemon (dockerd) does everything: builds images, runs containers, manages volumes and networks. The registry (Docker Hub) stores and distributes images. Daemon pulls from / pushes to it." style="width:100%;height:100%;box-sizing:border-box;padding:56px 80px;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;color:#14202E;background-color:#F4F7FA;background-image:linear-gradient(#14202e0a 1px,transparent 1px),linear-gradient(90deg,#14202e0a 1px,transparent 1px);background-size:48px 48px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:17px;letter-spacing:3px;text-transform:uppercase;color:#2E6FE0;">Model 03 · Client–server architecture</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:#5B6B7B;">03 / 07</div>
+    </div>
+    <div style="font-size:46px;font-weight:700;margin-top:6px;letter-spacing:-1px;">Who actually does the work</div>
+    <div style="font-size:21px;color:#5B6B7B;margin-top:4px;">You type into the client — but the <span style="color:#2E6FE0;font-weight:600;">daemon</span> is the engine that runs everything.</div>
+
+    <div style="display:flex;flex:1;margin-top:30px;gap:0;align-items:stretch;">
+      <!-- your machine boundary -->
+      <div style="flex:2.1;border:2px dashed #5B6B7B;border-radius:8px;padding:20px 26px 24px;display:flex;flex-direction:column;position:relative;background:#ffffff66;">
+        <div style="position:absolute;top:-13px;left:24px;background:#F4F7FA;padding:0 10px;font-family:'IBM Plex Mono',monospace;font-size:14px;letter-spacing:2px;color:#5B6B7B;">YOUR MACHINE</div>
+        <div style="display:flex;align-items:center;gap:24px;flex:1;">
+          <!-- client -->
+          <div style="flex:none;width:230px;border:2px solid #14202E;border-radius:6px;background:#fff;padding:22px;display:flex;flex-direction:column;align-items:center;gap:10px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:2px;color:#8A98A6;">1 · CLIENT</div>
+            <div style="font-size:23px;font-weight:700;">Docker Client</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;background:#14202E;color:#7FE0B0;padding:8px 12px;border-radius:3px;width:100%;text-align:center;">$ docker run</div>
+            <div style="font-size:15px;color:#5B6B7B;text-align:center;line-height:1.35;">The CLI. Sends commands — does no real work itself.</div>
+          </div>
+          <!-- api arrows -->
+          <div style="flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;color:#2E6FE0;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:1px;color:#5B6B7B;">REST API</div>
+            <div style="font-size:30px;line-height:0.8;">⇄</div>
+          </div>
+          <!-- daemon -->
+          <div style="flex:1;border:2px solid #2E6FE0;border-radius:6px;background:#2e6fe008;padding:20px 22px;display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;">
+              <div style="font-size:23px;font-weight:700;color:#2E6FE0;">Docker Daemon</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;">dockerd</div>
+            </div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:2px;color:#2E6FE0;">2 · SERVER — the engine</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;">
+              <div style="border:1.5px solid #2E6FE0;background:#fff;border-radius:3px;padding:9px 12px;font-size:15px;">🛠 builds images</div>
+              <div style="border:1.5px solid #2E6FE0;background:#fff;border-radius:3px;padding:9px 12px;font-size:15px;">▶ runs containers</div>
+              <div style="border:1.5px solid #2E6FE0;background:#fff;border-radius:3px;padding:9px 12px;font-size:15px;">🗄 manages volumes</div>
+              <div style="border:1.5px solid #2E6FE0;background:#fff;border-radius:3px;padding:9px 12px;font-size:15px;">🔌 manages networks</div>
+            </div>
+            <div style="border-top:1.5px dashed #2E6FE0;padding-top:10px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">objects: images · containers · volumes · networks</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- pull/push to registry -->
+      <div style="flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 18px;color:#2E6FE0;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">pull / push</div>
+        <div style="font-size:30px;line-height:0.8;">⇄</div>
+      </div>
+
+      <!-- registry -->
+      <div style="flex:1;border:2px solid #14202E;border-radius:8px;background:#14202E;color:#EEF2F6;padding:24px;display:flex;flex-direction:column;align-items:center;gap:14px;justify-content:center;">
+        <div style="font-size:34px;">☁️</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:2px;color:#7FA8E0;">3 · REGISTRY</div>
+        <div style="font-size:23px;font-weight:700;color:#fff;text-align:center;">Registry<br>(Docker Hub)</div>
+        <div style="font-size:15px;color:#B6C2CE;text-align:center;line-height:1.4;">Stores & distributes images. Like GitHub, but for container images.</div>
+        <div style="display:flex;flex-direction:column;gap:7px;width:100%;margin-top:4px;">
+          <div style="border:1.5px solid #3A4A5C;border-radius:3px;padding:7px 12px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#B6C2CE;">nginx:1.27</div>
+          <div style="border:1.5px solid #3A4A5C;border-radius:3px;padding:7px 12px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#B6C2CE;">ubuntu:latest</div>
+          <div style="border:1.5px solid #3A4A5C;border-radius:3px;padding:7px 12px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#B6C2CE;">postgres:16</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;display:flex;align-items:center;gap:16px;font-size:20px;color:#14202E;background:#fff;border:1.5px solid #C5D0DB;border-radius:6px;padding:16px 24px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;border:1.5px solid #2E6FE0;padding:5px 10px;border-radius:3px;white-space:nowrap;">key idea</span>
+      <span>The client and daemon are usually on the same machine — but they don't have to be. The client can drive a <strong>remote</strong> daemon over the same REST API.</span>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 6 — RUN FLOW ============ -->
+  <section data-label="docker run flow" data-speaker-notes="One command, six hidden steps. Client sends the request to the daemon. Daemon checks for the image locally. If missing, pulls from the registry. Creates a container from the image. Allocates a writable layer, a network interface and an IP. Starts it — nginx runs. You typed one line; all of that happened underneath." style="width:100%;height:100%;box-sizing:border-box;padding:56px 80px;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;color:#14202E;background-color:#F4F7FA;background-image:linear-gradient(#14202e0a 1px,transparent 1px),linear-gradient(90deg,#14202e0a 1px,transparent 1px);background-size:48px 48px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:17px;letter-spacing:3px;text-transform:uppercase;color:#2E6FE0;">Model 04 · One command, six steps</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:#5B6B7B;">04 / 07</div>
+    </div>
+    <div style="font-size:46px;font-weight:700;margin-top:6px;letter-spacing:-1px;">What happens on <span style="font-family:'IBM Plex Mono',monospace;color:#2E6FE0;">docker run nginx</span></div>
+    <div style="font-size:21px;color:#5B6B7B;margin-top:4px;">Follow the request from your keyboard to a running web server.</div>
+
+    <div style="display:flex;gap:18px;margin-top:30px;flex:1;align-items:stretch;">
+      <div style="flex:1;border:1.5px solid #C5D0DB;background:#fff;border-radius:6px;padding:20px 22px;display:flex;flex-direction:column;position:relative;">
+        <div style="position:absolute;top:18px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;color:#E3E9EF;">01</div>
+        <div style="width:38px;height:38px;border-radius:50%;background:#2E6FE0;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;">1</div>
+        <div style="font-size:20px;font-weight:600;margin-top:16px;">Client → Daemon</div>
+        <div style="font-size:16px;color:#5B6B7B;margin-top:8px;line-height:1.4;flex:1;">The CLI packages your command as a REST API request and hands it to <span style="font-family:'IBM Plex Mono',monospace;">dockerd</span>.</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;border-top:1.5px dashed #C5D0DB;padding-top:10px;">CLIENT</div>
+      </div>
+      <div style="flex:none;align-self:center;color:#C5D0DB;font-size:26px;">→</div>
+
+      <div style="flex:1;border:1.5px solid #C5D0DB;background:#fff;border-radius:6px;padding:20px 22px;display:flex;flex-direction:column;position:relative;">
+        <div style="position:absolute;top:18px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;color:#E3E9EF;">02</div>
+        <div style="width:38px;height:38px;border-radius:50%;background:#2E6FE0;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;">2</div>
+        <div style="font-size:20px;font-weight:600;margin-top:16px;">Image cached?</div>
+        <div style="font-size:16px;color:#5B6B7B;margin-top:8px;line-height:1.4;flex:1;">Daemon checks: is the <span style="font-family:'IBM Plex Mono',monospace;">nginx</span> image already on this machine?</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;border-top:1.5px dashed #C5D0DB;padding-top:10px;">DAEMON</div>
+      </div>
+      <div style="flex:none;align-self:center;color:#C5D0DB;font-size:26px;">→</div>
+
+      <div style="flex:1;border:1.5px solid #14202E;background:#14202E;color:#EEF2F6;border-radius:6px;padding:20px 22px;display:flex;flex-direction:column;position:relative;">
+        <div style="position:absolute;top:18px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;color:#2A3B4D;">03</div>
+        <div style="width:38px;height:38px;border-radius:50%;background:#7FA8E0;color:#14202E;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;">3</div>
+        <div style="font-size:20px;font-weight:600;margin-top:16px;color:#fff;">Pull if missing</div>
+        <div style="font-size:16px;color:#B6C2CE;margin-top:8px;line-height:1.4;flex:1;">Not local? The daemon downloads it from the registry (Docker Hub).</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#7FA8E0;border-top:1.5px dashed #3A4A5C;padding-top:10px;">REGISTRY ☁</div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:center;color:#2E6FE0;font-size:24px;margin:8px 0;">↓</div>
+
+    <div style="display:flex;gap:18px;flex:1;align-items:stretch;">
+      <div style="flex:1;border:1.5px solid #C5D0DB;background:#fff;border-radius:6px;padding:20px 22px;display:flex;flex-direction:column;position:relative;">
+        <div style="position:absolute;top:18px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;color:#E3E9EF;">04</div>
+        <div style="width:38px;height:38px;border-radius:50%;background:#2E6FE0;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;">4</div>
+        <div style="font-size:20px;font-weight:600;margin-top:16px;">Create container</div>
+        <div style="font-size:16px;color:#5B6B7B;margin-top:8px;line-height:1.4;flex:1;">Daemon builds a container from the image — an instance, not yet running.</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;border-top:1.5px dashed #C5D0DB;padding-top:10px;">create</div>
+      </div>
+      <div style="flex:none;align-self:center;color:#C5D0DB;font-size:26px;">→</div>
+
+      <div style="flex:1;border:1.5px solid #C5D0DB;background:#fff;border-radius:6px;padding:20px 22px;display:flex;flex-direction:column;position:relative;">
+        <div style="position:absolute;top:18px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;color:#E3E9EF;">05</div>
+        <div style="width:38px;height:38px;border-radius:50%;background:#2E6FE0;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;">5</div>
+        <div style="font-size:20px;font-weight:600;margin-top:16px;">Allocate resources</div>
+        <div style="font-size:16px;color:#5B6B7B;margin-top:8px;line-height:1.4;flex:1;">A writable layer, a network interface and an IP address are attached.</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;border-top:1.5px dashed #C5D0DB;padding-top:10px;">fs · net · ip</div>
+      </div>
+      <div style="flex:none;align-self:center;color:#C5D0DB;font-size:26px;">→</div>
+
+      <div style="flex:1;border:2px solid #2E6FE0;background:#2e6fe008;border-radius:6px;padding:20px 22px;display:flex;flex-direction:column;position:relative;">
+        <div style="position:absolute;top:18px;right:20px;font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;color:#Bcd4f5;">06</div>
+        <div style="width:38px;height:38px;border-radius:50%;background:#2E6FE0;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;">6</div>
+        <div style="font-size:20px;font-weight:600;margin-top:16px;color:#2E6FE0;">Start it ▶</div>
+        <div style="font-size:16px;color:#14202E;margin-top:8px;line-height:1.4;flex:1;">The container starts and nginx runs. You typed one line — all of this happened underneath.</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;border-top:1.5px dashed #2E6FE0;padding-top:10px;">RUNNING</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 7 — LIFECYCLE ============ -->
+  <section data-label="Lifecycle" data-speaker-notes="A container moves through states. docker run is really create + start combined, plus a pull. Created → Running → Stopped → Removed. Pause sits beside Running. Two beginner traps: a stopped container still exists (ps -a to see it), and a container lives only as long as its main process." style="width:100%;height:100%;box-sizing:border-box;padding:56px 80px;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;color:#14202E;background-color:#F4F7FA;background-image:linear-gradient(#14202e0a 1px,transparent 1px),linear-gradient(90deg,#14202e0a 1px,transparent 1px);background-size:48px 48px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:17px;letter-spacing:3px;text-transform:uppercase;color:#2E6FE0;">Model 05 · The state machine</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:#5B6B7B;">05 / 07</div>
+    </div>
+    <div style="font-size:46px;font-weight:700;margin-top:6px;letter-spacing:-1px;">The container lifecycle</div>
+    <div style="font-size:21px;color:#5B6B7B;margin-top:4px;">Every command is a transition between states. Edge labels are the commands.</div>
+
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:14px;">
+      <!-- run umbrella -->
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:30px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;background:#2E6FE0;color:#fff;padding:8px 16px;border-radius:4px;">docker run</div>
+        <div style="font-size:18px;color:#5B6B7B;">= <span style="font-family:'IBM Plex Mono',monospace;color:#14202E;">create</span> + <span style="font-family:'IBM Plex Mono',monospace;color:#14202E;">start</span>, with an automatic image pull first — the one command you'll use 90% of the time.</div>
+      </div>
+
+      <!-- main row of states -->
+      <div style="display:flex;align-items:center;gap:0;">
+        <!-- Created -->
+        <div style="flex:none;width:190px;border:1.5px solid #C5D0DB;background:#fff;border-radius:6px;padding:18px;text-align:center;">
+          <div style="font-size:23px;font-weight:700;">Created</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;margin-top:4px;">docker create</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;color:#2E6FE0;"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;">start</div><div style="font-size:22px;line-height:0.6;">───→</div></div>
+        <!-- Running -->
+        <div style="flex:none;width:210px;border:2px solid #2E6FE0;background:#2e6fe00f;border-radius:6px;padding:18px;text-align:center;">
+          <div style="font-size:23px;font-weight:700;color:#2E6FE0;">Running ▶</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;margin-top:4px;">shows in docker ps</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;color:#2E6FE0;"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;">stop / exit</div><div style="font-size:22px;line-height:0.6;">───→</div></div>
+        <!-- Stopped -->
+        <div style="flex:none;width:200px;border:1.5px solid #C5D0DB;background:#fff;border-radius:6px;padding:18px;text-align:center;">
+          <div style="font-size:23px;font-weight:700;">Stopped</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;margin-top:4px;">"Exited"</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;color:#14202E;"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;">rm</div><div style="font-size:22px;line-height:0.6;">───→</div></div>
+        <!-- Removed -->
+        <div style="flex:none;width:190px;border:1.5px dashed #8A98A6;background:#EEF2F6;border-radius:6px;padding:18px;text-align:center;">
+          <div style="font-size:23px;font-weight:700;color:#5B6B7B;">Removed</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8A98A6;margin-top:4px;">gone for good</div>
+        </div>
+      </div>
+
+      <!-- back-edges + paused -->
+      <div style="display:flex;margin-top:18px;">
+        <div style="width:190px;flex:none;"></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">↑ pause ⇅ unpause</div>
+          <div style="width:210px;border:1.5px dashed #2E6FE0;background:#fff;border-radius:6px;padding:12px;text-align:center;margin-top:8px;">
+            <div style="font-size:20px;font-weight:700;color:#2E6FE0;">Paused ⏸</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B6B7B;margin-top:2px;">frozen in place</div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#2E6FE0;text-align:center;">← start<br>(stopped → running again)</div>
+        </div>
+        <div style="width:190px;flex:none;"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:18px;margin-top:18px;">
+      <div style="flex:1;border:1.5px solid #C5D0DB;background:#fff;border-left:4px solid #2E6FE0;border-radius:6px;padding:16px 22px;">
+        <div style="font-size:19px;font-weight:600;">A stopped container still exists.</div>
+        <div style="font-size:17px;color:#5B6B7B;margin-top:4px;line-height:1.4;"><span style="font-family:'IBM Plex Mono',monospace;color:#14202E;">docker ps</span> shows only running ones. Use <span style="font-family:'IBM Plex Mono',monospace;color:#14202E;">docker ps -a</span> to see the stopped — they keep their name and disk until you <span style="font-family:'IBM Plex Mono',monospace;color:#14202E;">rm</span>.</div>
+      </div>
+      <div style="flex:1;border:1.5px solid #C5D0DB;background:#fff;border-left:4px solid #2E6FE0;border-radius:6px;padding:16px 22px;">
+        <div style="font-size:19px;font-weight:600;">It lives only as long as its main process.</div>
+        <div style="font-size:17px;color:#5B6B7B;margin-top:4px;line-height:1.4;">A container isn't a box that stays open. When its main process exits, it stops. That's why <span style="font-family:'IBM Plex Mono',monospace;color:#14202E;">docker run ubuntu</span> seems to "do nothing" — give it <span style="font-family:'IBM Plex Mono',monospace;color:#14202E;">-it … bash</span>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 8 — LINUX INTERNALS ============ -->
+  <section data-label="Kernel internals" data-speaker-notes="The magic demystified. Three ordinary kernel features. Namespaces = what a process can SEE (isolation): PID, NET, MNT, UTS, IPC, USER. cgroups = how much it can USE (limits): CPU, memory, IO, bandwidth. Union FS (OverlayFS) = how images are STACKED: read-only layers plus a thin writable layer on top." style="width:100%;height:100%;box-sizing:border-box;padding:56px 80px;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;color:#14202E;background-color:#F4F7FA;background-image:linear-gradient(#14202e0a 1px,transparent 1px),linear-gradient(90deg,#14202e0a 1px,transparent 1px);background-size:48px 48px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:17px;letter-spacing:3px;text-transform:uppercase;color:#2E6FE0;">Model 06 · The kernel features behind the magic</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:#5B6B7B;">06 / 07</div>
+    </div>
+    <div style="font-size:46px;font-weight:700;margin-top:6px;letter-spacing:-1px;">There is no magic — just three kernel features</div>
+    <div style="font-size:21px;color:#5B6B7B;margin-top:4px;">A container is an ordinary Linux process wearing three pieces of equipment.</div>
+
+    <div style="display:flex;gap:22px;margin-top:30px;flex:1;align-items:stretch;">
+      <!-- namespaces -->
+      <div style="flex:1;border:1.5px solid #C5D0DB;background:#fff;border-radius:8px;padding:26px 26px;display:flex;flex-direction:column;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:2px;color:#8A98A6;">ISOLATION</div>
+        <div style="font-size:28px;font-weight:700;margin-top:6px;">Namespaces</div>
+        <div style="font-size:18px;color:#2E6FE0;font-weight:600;margin-top:2px;">“what a process can see”</div>
+        <div style="font-size:16px;color:#5B6B7B;margin-top:12px;line-height:1.4;">Partition kernel resources so a container sees its own slice — and nothing of the host.</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px;">
+          <div style="display:flex;gap:10px;align-items:baseline;"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;min-width:52px;">PID</span><span style="font-size:16px;color:#14202E;">own process tree (your app is PID 1)</span></div>
+          <div style="display:flex;gap:10px;align-items:baseline;"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;min-width:52px;">NET</span><span style="font-size:16px;color:#14202E;">own interfaces, IP, routing</span></div>
+          <div style="display:flex;gap:10px;align-items:baseline;"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;min-width:52px;">MNT</span><span style="font-size:16px;color:#14202E;">own filesystem mounts (own /)</span></div>
+          <div style="display:flex;gap:10px;align-items:baseline;"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;min-width:52px;">UTS</span><span style="font-size:16px;color:#14202E;">own hostname</span></div>
+          <div style="display:flex;gap:10px;align-items:baseline;"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;min-width:52px;">IPC</span><span style="font-size:16px;color:#14202E;">own inter-process comms</span></div>
+          <div style="display:flex;gap:10px;align-items:baseline;"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;min-width:52px;">USER</span><span style="font-size:16px;color:#14202E;">map container users → host users</span></div>
+        </div>
+      </div>
+
+      <!-- cgroups -->
+      <div style="flex:1;border:1.5px solid #C5D0DB;background:#fff;border-radius:8px;padding:26px 26px;display:flex;flex-direction:column;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:2px;color:#8A98A6;">LIMITS</div>
+        <div style="font-size:28px;font-weight:700;margin-top:6px;">Control Groups</div>
+        <div style="font-size:18px;color:#2E6FE0;font-weight:600;margin-top:2px;">“how much it can use”</div>
+        <div style="font-size:16px;color:#5B6B7B;margin-top:12px;line-height:1.4;">Meter and cap resource usage — e.g. “at most 512 MB RAM and half a CPU core.”</div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:18px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:15px;"><span>CPU</span><span style="font-family:'IBM Plex Mono',monospace;color:#5B6B7B;">0.5 core</span></div>
+            <div style="height:12px;background:#EEF2F6;border-radius:6px;margin-top:5px;overflow:hidden;"><div style="width:50%;height:100%;background:#2E6FE0;border-radius:6px;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:15px;"><span>Memory</span><span style="font-family:'IBM Plex Mono',monospace;color:#5B6B7B;">512 MB cap</span></div>
+            <div style="height:12px;background:#EEF2F6;border-radius:6px;margin-top:5px;overflow:hidden;"><div style="width:38%;height:100%;background:#2E6FE0;border-radius:6px;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:15px;"><span>Disk I/O</span><span style="font-family:'IBM Plex Mono',monospace;color:#5B6B7B;">throttled</span></div>
+            <div style="height:12px;background:#EEF2F6;border-radius:6px;margin-top:5px;overflow:hidden;"><div style="width:62%;height:100%;background:#2E6FE0;border-radius:6px;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:15px;"><span>Network</span><span style="font-family:'IBM Plex Mono',monospace;color:#5B6B7B;">limited</span></div>
+            <div style="height:12px;background:#EEF2F6;border-radius:6px;margin-top:5px;overflow:hidden;"><div style="width:45%;height:100%;background:#2E6FE0;border-radius:6px;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- union fs -->
+      <div style="flex:1;border:1.5px solid #C5D0DB;background:#fff;border-radius:8px;padding:26px 26px;display:flex;flex-direction:column;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:2px;color:#8A98A6;">STORAGE</div>
+        <div style="font-size:28px;font-weight:700;margin-top:6px;">Union FS</div>
+        <div style="font-size:18px;color:#2E6FE0;font-weight:600;margin-top:2px;">“how images are layered”</div>
+        <div style="font-size:16px;color:#5B6B7B;margin-top:12px;line-height:1.4;">OverlayFS merges stacked read-only layers into one view, adding a writable layer on run.</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-top:20px;">
+          <div style="border:1.5px dashed #2E6FE0;background:repeating-linear-gradient(45deg,#2e6fe00f,#2e6fe00f 7px,transparent 7px,transparent 14px);border-radius:3px;padding:11px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;font-weight:600;">writable layer (per container)</div>
+          <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;border-radius:3px;padding:10px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">RO layer · app</div>
+          <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;border-radius:3px;padding:10px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">RO layer · libs</div>
+          <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;border-radius:3px;padding:10px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">RO layer · base</div>
+        </div>
+        <div style="font-size:14px;color:#5B6B7B;margin-top:14px;line-height:1.35;">Common layers are shared across images — stored once, never duplicated.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:22px;background:#14202E;border-radius:6px;padding:18px 26px;display:flex;align-items:center;gap:28px;">
+      <div style="font-size:20px;color:#EEF2F6;"><strong style="color:#fff;">Mental model:</strong></div>
+      <div style="font-size:19px;color:#B6C2CE;">Namespaces = <span style="color:#7FA8E0;">what you see</span>　·　cgroups = <span style="color:#7FA8E0;">what you can use</span>　·　Union FS = <span style="color:#7FA8E0;">how the image is assembled</span></div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 9 — STATELESSNESS ============ -->
+  <section data-label="Statelessness" data-speaker-notes="The lab that makes it click. Install curl inside container A — it lives only in A's writable layer. Start a brand-new container B from the same image: no curl. Remove a container and its writable layer is destroyed; changes vanish. That's why persistence needs volumes, coming Day 3." style="width:100%;height:100%;box-sizing:border-box;padding:56px 80px;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;color:#14202E;background-color:#F4F7FA;background-image:linear-gradient(#14202e0a 1px,transparent 1px),linear-gradient(90deg,#14202e0a 1px,transparent 1px);background-size:48px 48px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:17px;letter-spacing:3px;text-transform:uppercase;color:#2E6FE0;">Model 07 · The writable layer is disposable</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:#5B6B7B;">07 / 07</div>
+    </div>
+    <div style="font-size:46px;font-weight:700;margin-top:6px;letter-spacing:-1px;">Statelessness — each container starts fresh</div>
+    <div style="font-size:21px;color:#5B6B7B;margin-top:4px;">Changes live in the writable layer. Remove the container and they're gone.</div>
+
+    <div style="display:flex;gap:30px;margin-top:30px;flex:1;align-items:stretch;">
+      <!-- container A -->
+      <div style="flex:1;border:2px solid #2E6FE0;background:#2e6fe008;border-radius:8px;padding:22px;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;"><div style="font-size:22px;font-weight:700;color:#2E6FE0;">Container A</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">from ubuntu</div></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#14202E;color:#7FE0B0;border-radius:4px;padding:10px 12px;margin-top:12px;">apt-get install curl ✓</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-top:auto;">
+          <div style="border:1.5px solid #2E6FE0;background:#fff;border-radius:3px;padding:11px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#2E6FE0;font-weight:600;">writable layer · has curl ✓</div>
+          <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;border-radius:3px;padding:9px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">shared read-only image</div>
+        </div>
+      </div>
+
+      <!-- container B -->
+      <div style="flex:1;border:1.5px solid #C5D0DB;background:#fff;border-radius:8px;padding:22px;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;"><div style="font-size:22px;font-weight:700;">Container B</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">same image, new run</div></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#14202E;color:#E08A8A;border-radius:4px;padding:10px 12px;margin-top:12px;">curl: not found ✗</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-top:auto;">
+          <div style="border:1.5px dashed #C5D0DB;background:#F4F7FA;border-radius:3px;padding:11px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#5B6B7B;">writable layer · empty</div>
+          <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;border-radius:3px;padding:9px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">shared read-only image</div>
+        </div>
+      </div>
+
+      <!-- removal -->
+      <div style="flex:1;border:1.5px dashed #8A98A6;background:#EEF2F6;border-radius:8px;padding:22px;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;"><div style="font-size:22px;font-weight:700;color:#5B6B7B;">docker rm A</div><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8A98A6;">cleanup</div></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#3A4A5C;color:#EEF2F6;border-radius:4px;padding:10px 12px;margin-top:12px;">writable layer destroyed</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-top:auto;">
+          <div style="border:1.5px dashed #8A98A6;background:repeating-linear-gradient(45deg,#8a98a614,#8a98a614 7px,transparent 7px,transparent 14px);border-radius:3px;padding:11px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#8A98A6;">curl gone with it ✗</div>
+          <div style="border:1.5px solid #C5D0DB;background:#F4F7FA;border-radius:3px;padding:9px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B6B7B;">image untouched, reusable</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:18px;margin-top:24px;">
+      <div style="flex:2;border:1.5px solid #C5D0DB;background:#fff;border-radius:6px;padding:18px 24px;font-size:19px;line-height:1.45;color:#14202E;">
+        Whatever you change inside a container lives <strong>only</strong> in that one container's writable layer. A new container from the same image is born clean — and removing a container deletes its layer for good.
+      </div>
+      <div style="flex:1;border:2px solid #2E6FE0;background:#2e6fe008;border-radius:6px;padding:18px 24px;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:2px;color:#2E6FE0;">NEXT — DAY 3</div>
+        <div style="font-size:20px;font-weight:600;margin-top:4px;">Need data to survive? That's <strong>volumes</strong>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 10 — RECAP ============ -->
+  <section data-label="Recap" data-speaker-notes="Seven sentences to carry forward. If any feels shaky, revisit that diagram. These are the load-bearing ideas for every later day." style="width:100%;height:100%;box-sizing:border-box;padding:64px 80px;display:flex;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;color:#14202E;background-color:#14202E;background-image:linear-gradient(#ffffff0a 1px,transparent 1px),linear-gradient(90deg,#ffffff0a 1px,transparent 1px);background-size:48px 48px;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:17px;letter-spacing:3px;text-transform:uppercase;color:#7FA8E0;">The seven mental models</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;color:#8A98A6;">recap</div>
+    </div>
+    <div style="font-size:48px;font-weight:700;margin-top:8px;letter-spacing:-1px;color:#fff;">Carry these seven sentences forward</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:34px;flex:1;">
+      <div style="border:1.5px solid #3A4A5C;background:#1B2B3D;border-radius:6px;padding:20px 24px;display:flex;gap:18px;align-items:flex-start;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#7FA8E0;border:1.5px solid #3A4A5C;border-radius:3px;padding:5px 9px;">01</div>
+        <div style="font-size:20px;color:#EEF2F6;line-height:1.4;">A container is an <strong style="color:#fff;">isolated process</strong> sharing the host kernel — not a lightweight VM.</div>
+      </div>
+      <div style="border:1.5px solid #3A4A5C;background:#1B2B3D;border-radius:6px;padding:20px 24px;display:flex;gap:18px;align-items:flex-start;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#7FA8E0;border:1.5px solid #3A4A5C;border-radius:3px;padding:5px 9px;">02</div>
+        <div style="font-size:20px;color:#EEF2F6;line-height:1.4;">An <strong style="color:#fff;">image</strong> is the read-only template (class / recipe); a <strong style="color:#fff;">container</strong> is a running instance (object / dish).</div>
+      </div>
+      <div style="border:1.5px solid #3A4A5C;background:#1B2B3D;border-radius:6px;padding:20px 24px;display:flex;gap:18px;align-items:flex-start;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#7FA8E0;border:1.5px solid #3A4A5C;border-radius:3px;padding:5px 9px;">03</div>
+        <div style="font-size:20px;color:#EEF2F6;line-height:1.4;">Four parts: <strong style="color:#fff;">client</strong> talks over REST to the <strong style="color:#fff;">daemon</strong>, which uses the <strong style="color:#fff;">registry</strong> and manages <strong style="color:#fff;">objects</strong>.</div>
+      </div>
+      <div style="border:1.5px solid #3A4A5C;background:#1B2B3D;border-radius:6px;padding:20px 24px;display:flex;gap:18px;align-items:flex-start;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#7FA8E0;border:1.5px solid #3A4A5C;border-radius:3px;padding:5px 9px;">04</div>
+        <div style="font-size:20px;color:#EEF2F6;line-height:1.4;"><span style="font-family:'IBM Plex Mono',monospace;color:#fff;">docker run</span> = pull (if needed) + <strong style="color:#fff;">create</strong> + <strong style="color:#fff;">start</strong>, all in one line.</div>
+      </div>
+      <div style="border:1.5px solid #3A4A5C;background:#1B2B3D;border-radius:6px;padding:20px 24px;display:flex;gap:18px;align-items:flex-start;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#7FA8E0;border:1.5px solid #3A4A5C;border-radius:3px;padding:5px 9px;">05</div>
+        <div style="font-size:20px;color:#EEF2F6;line-height:1.4;">A container lives only as long as its <strong style="color:#fff;">main process</strong>; stopped ≠ removed (<span style="font-family:'IBM Plex Mono',monospace;color:#fff;">ps -a</span>).</div>
+      </div>
+      <div style="border:1.5px solid #3A4A5C;background:#1B2B3D;border-radius:6px;padding:20px 24px;display:flex;gap:18px;align-items:flex-start;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#7FA8E0;border:1.5px solid #3A4A5C;border-radius:3px;padding:5px 9px;">06</div>
+        <div style="font-size:20px;color:#EEF2F6;line-height:1.4;">Namespaces = <strong style="color:#fff;">see</strong>, cgroups = <strong style="color:#fff;">use</strong>, Union FS = <strong style="color:#fff;">stack</strong>.</div>
+      </div>
+      <div style="grid-column:1 / -1;border:1.5px solid #2E6FE0;background:#2e6fe01a;border-radius:6px;padding:20px 24px;display:flex;gap:18px;align-items:center;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#7FA8E0;border:1.5px solid #2E6FE0;border-radius:3px;padding:5px 9px;">07</div>
+        <div style="font-size:20px;color:#EEF2F6;line-height:1.4;">Containers are <strong style="color:#fff;">stateless</strong> — changes live in the disposable writable layer; persistence needs <strong style="color:#fff;">volumes</strong> (Day 3).</div>
+      </div>
+    </div>
+  </section>
+
+</x-import>
+</x-dc>
+</body>
+</html>
